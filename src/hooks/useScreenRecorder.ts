@@ -1,11 +1,13 @@
 import { useState, useRef, useCallback } from 'react';
 
+export type RecordingMode = 'screen' | 'canvas';
+
 interface UseScreenRecorderReturn {
   isRecording: boolean;
   isPaused: boolean;
   recordedChunks: Blob[];
   videoUrl: string | null;
-  startRecording: () => Promise<void>;
+  startRecording: (mode: RecordingMode, canvasRef?: React.RefObject<HTMLCanvasElement | null>) => Promise<void>;
   stopRecording: () => void;
   pauseRecording: () => void;
   resumeRecording: () => void;
@@ -22,17 +24,34 @@ export const useScreenRecorder = (): UseScreenRecorderReturn => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const startRecording = useCallback(async () => {
-    try {
-      // 画面キャプチャの取得
-      const displayStream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          mediaSource: 'screen' as MediaStreamTrackConstraintSet['mediaSource']
-        },
-        audio: false
-      });
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+  }, []);
 
-      streamRef.current = displayStream;
+  const startRecording = useCallback(async (mode: RecordingMode, canvasRef?: React.RefObject<HTMLCanvasElement | null>) => {
+    try {
+      let stream: MediaStream;
+
+      if (mode === 'canvas') {
+        // Canvas録画
+        if (!canvasRef?.current) {
+          throw new Error('Canvasの参照が見つかりません');
+        }
+        
+        const canvas = canvasRef.current;
+        const canvasStream = canvas.captureStream(30); // 30 FPS
+        stream = canvasStream;
+      } else {
+        // 画面キャプチャの取得
+        stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: false
+        });
+      }
+
+      streamRef.current = stream;
 
       // MediaRecorderの設定
       const options = { mimeType: 'video/webm;codecs=vp9' };
@@ -40,7 +59,7 @@ export const useScreenRecorder = (): UseScreenRecorderReturn => {
         options.mimeType = 'video/webm';
       }
 
-      const mediaRecorder = new MediaRecorder(displayStream, options);
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
 
       const chunks: Blob[] = [];
@@ -65,10 +84,12 @@ export const useScreenRecorder = (): UseScreenRecorderReturn => {
         }
       };
 
-      // ユーザーが共有停止ボタンを押した時の処理
-      displayStream.getVideoTracks()[0].addEventListener('ended', () => {
-        stopRecording();
-      });
+      // ユーザーが共有停止ボタンを押した時の処理（画面録画の場合のみ）
+      if (mode === 'screen') {
+        stream.getVideoTracks()[0].addEventListener('ended', () => {
+          stopRecording();
+        });
+      }
 
       mediaRecorder.start();
       setIsRecording(true);
@@ -76,15 +97,9 @@ export const useScreenRecorder = (): UseScreenRecorderReturn => {
       setVideoUrl(null);
     } catch (error) {
       console.error('録画の開始に失敗しました:', error);
-      alert('画面録画の開始に失敗しました。ブラウザが画面録画をサポートしているか確認してください。');
+      alert('録画の開始に失敗しました。ブラウザが録画をサポートしているか確認してください。');
     }
-  }, []);
-
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-    }
-  }, [isRecording]);
+  }, [stopRecording]);
 
   const pauseRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording && !isPaused) {

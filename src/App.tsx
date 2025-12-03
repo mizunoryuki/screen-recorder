@@ -1,7 +1,12 @@
 import './App.css'
-import { useScreenRecorder } from './hooks/useScreenRecorder'
+import { useRef, useState } from 'react'
+import { useScreenRecorder, type RecordingMode } from './hooks/useScreenRecorder'
+import { DrawingCanvas } from './components/DrawingCanvas'
 
 function App() {
+  const [mode, setMode] = useState<RecordingMode>('screen')
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  
   const {
     isRecording,
     isPaused,
@@ -14,17 +19,53 @@ function App() {
     clearRecording
   } = useScreenRecorder()
 
+  const handleStartRecording = () => {
+    startRecording(mode, canvasRef)
+  }
+
   return (
     <div className="app-container">
       <h1>画面録画アプリ</h1>
       
+      <div className="mode-selector">
+        <label className="mode-option">
+          <input
+            type="radio"
+            name="mode"
+            value="screen"
+            checked={mode === 'screen'}
+            onChange={() => setMode('screen')}
+            disabled={isRecording}
+          />
+          <span>🖥️ 画面全体を録画</span>
+        </label>
+        <label className="mode-option">
+          <input
+            type="radio"
+            name="mode"
+            value="canvas"
+            checked={mode === 'canvas'}
+            onChange={() => setMode('canvas')}
+            disabled={isRecording}
+          />
+          <span>🎨 Canvasを録画</span>
+        </label>
+      </div>
+
+      {mode === 'canvas' && (
+        <div className="canvas-section">
+          <h2>{isRecording ? '録画中のCanvas' : '描画エリア'}</h2>
+          <DrawingCanvas canvasRef={canvasRef} isRecording={isRecording} />
+        </div>
+      )}
+      
       <div className="controls">
         {!isRecording ? (
           <button 
-            onClick={startRecording}
+            onClick={handleStartRecording}
             className="btn btn-start"
           >
-            🔴 録画開始
+            🔴 録画開始 ({mode === 'screen' ? '画面全体' : 'Canvas'})
           </button>
         ) : (
           <>

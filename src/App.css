@@ -142,3 +142,143 @@ h1 {
   justify-content: center;
   flex-wrap: wrap;
 }
+
+/* Mode Selector */
+.mode-selector {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(100, 108, 255, 0.1);
+  border-radius: 12px;
+}
+
+.mode-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mode-option input[type="radio"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.mode-option input[type="radio"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.mode-option span {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Canvas Section */
+.canvas-section {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.canvas-section h2 {
+  margin-bottom: 1.5rem;
+  color: #646cff;
+}
+
+.canvas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.canvas-controls {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.control-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.color-picker {
+  width: 60px;
+  height: 40px;
+  border: 2px solid #646cff;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.line-width-slider {
+  width: 150px;
+  cursor: pointer;
+}
+
+.btn-clear-canvas {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: #ef4444;
+  color: white;
+}
+
+.btn-clear-canvas:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.drawing-canvas {
+  border: 3px solid #646cff;
+  border-radius: 8px;
+  cursor: crosshair;
+  background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  touch-action: none;
+}
+
+.drawing-canvas.recording {
+  border-color: #ef4444;
+  animation: recording-border 2s ease-in-out infinite;
+}
+
+@keyframes recording-border {
+  0%, 100% {
+    border-color: #ef4444;
+  }
+  50% {
+    border-color: #f59e0b;
+  }
+}
