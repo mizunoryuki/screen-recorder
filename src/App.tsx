@@ -1,34 +1,90 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { useScreenRecorder } from './hooks/useScreenRecorder'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const {
+    isRecording,
+    isPaused,
+    videoUrl,
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+    downloadVideo,
+    clearRecording
+  } = useScreenRecorder()
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app-container">
+      <h1>画面録画アプリ</h1>
+      
+      <div className="controls">
+        {!isRecording ? (
+          <button 
+            onClick={startRecording}
+            className="btn btn-start"
+          >
+            🔴 録画開始
+          </button>
+        ) : (
+          <>
+            <button 
+              onClick={stopRecording}
+              className="btn btn-stop"
+            >
+              ⏹️ 録画停止
+            </button>
+            {!isPaused ? (
+              <button 
+                onClick={pauseRecording}
+                className="btn btn-pause"
+              >
+                ⏸️ 一時停止
+              </button>
+            ) : (
+              <button 
+                onClick={resumeRecording}
+                className="btn btn-resume"
+              >
+                ▶️ 再開
+              </button>
+            )}
+          </>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+      {isRecording && (
+        <div className="recording-status">
+          <span className="recording-indicator">●</span>
+          {isPaused ? '一時停止中...' : '録画中...'}
+        </div>
+      )}
+
+      {videoUrl && (
+        <div className="video-container">
+          <h2>録画結果</h2>
+          <video 
+            src={videoUrl} 
+            controls 
+            className="recorded-video"
+          />
+          <div className="video-actions">
+            <button 
+              onClick={downloadVideo}
+              className="btn btn-download"
+            >
+              💾 ダウンロード
+            </button>
+            <button 
+              onClick={clearRecording}
+              className="btn btn-clear"
+            >
+              🗑️ クリア
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
